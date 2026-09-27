@@ -17,8 +17,9 @@ The repo root is a single-plugin marketplace (`.cursor-plugin/marketplace.json` 
 
 ## Install the skill folder only
 
+Clone the repository above, then:
+
 ```bash
-git clone https://github.com/jonclegg/progress-dashboard.git  # pragma: allowlist secret
 mkdir -p .cursor/skills
 cp -R progress-dashboard/skills/progress-dashboard .cursor/skills/
 ```
