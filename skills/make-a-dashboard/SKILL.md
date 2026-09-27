@@ -1,20 +1,24 @@
 ---
-name: progress-dashboard
-description: "Keep a live HTML progress dashboard for long autonomous work. Use when a task has more than 5 steps, is expected to take about 30 minutes or longer, will run while the user is away, or the user asks for a progress dashboard or /progress-dashboard. Before that work starts, create .dashboard/index.html and .dashboard/state.json, then update them after every step. Record blockers, questions with the default action if the user does not answer, and the latest deliverables, using real wall-clock times."
+name: make-a-dashboard
+description: "Automatically make a dashboard before any task with more than 5 steps or an expected runtime of about 30 minutes or longer. Do this before heavy work starts. Do not wait for the user to ask. Also use when they say make a dashboard, type /make-a-dashboard, or ask for a progress page. Create .dashboard/index.html and .dashboard/state.json first, then update them after every step. Record blockers, questions with the default action if unanswered, and the latest deliverables, using real wall-clock times."
 ---
 
-# Progress dashboard
+# Make a dashboard
 
-Invoke with `/progress-dashboard`. On a long task, apply this skill without waiting to be asked.
+Users invoke this with `/make-a-dashboard` or by saying “make a dashboard”.
+
+On a long task, run it yourself. Do not wait for that phrase.
 
 ## When to use
 
-Set the dashboard up before the first step when either of these is true:
+Before the first heavy step, make the dashboard whenever either of these is true:
 
 - The work has more than 5 steps.
 - You expect it to take about 30 minutes or longer.
 
-Also use it when the user asks for a progress page, a status board, or this skill by name.
+That is the default. The user does not have to remember to ask. If you are about to start a multi-step or long autonomous run, set the page up first, then start the work.
+
+Also use it when they say “make a dashboard”, type `/make-a-dashboard`, or ask for a progress page or status board.
 
 Skip it for a short edit, a single command, or a question you can answer in one pass.
 
@@ -44,7 +48,7 @@ The builder may also store those same three style fields in agent memory. It doe
 ## Style, once
 
 1. If `.dashboard/style.json` exists, use it.
-2. Otherwise, if agent memory already has progress-dashboard style prefs, write them into `.dashboard/style.json` and use them.
+2. Otherwise, if agent memory already has make-a-dashboard style prefs, write them into `.dashboard/style.json` and use them.
 3. Otherwise ask once: dark or light, dense or airy, and one accent color. They can accept this as-is: dark, airy, `#e3a45a`.
 4. If the task must start before they answer, do not wait. Save dark / airy / `#e3a45a` to `style.json` and memory, and add a question whose default is those prefs so they can correct it on the page.
 5. After `style.json` exists, never ask again. If they change it later, update the file and memory.

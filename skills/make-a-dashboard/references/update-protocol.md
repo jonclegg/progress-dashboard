@@ -139,7 +139,7 @@ Step `running` means that step is the one in progress. Do not mark two steps `ru
 - `density`: `dense` or `airy`
 - `accent`: one `#rrggbb` color
 
-Write this file on first run. Later tasks in the same project read it and do not ask. Mirror the same object into agent memory under a progress-dashboard style note so a new project can reuse it.
+Write this file on first run. Later tasks in the same project read it and do not ask. Mirror the same object into agent memory under a make-a-dashboard style note so a new project can reuse it.
 
 ## HTML
 

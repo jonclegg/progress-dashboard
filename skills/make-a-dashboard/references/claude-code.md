@@ -6,10 +6,10 @@ The dashboard files and the update rules are the same as in Cursor. This note is
 
 Copy this skill folder into either location:
 
-- Project: `.claude/skills/progress-dashboard/`
-- User: `~/.claude/skills/progress-dashboard/`
+- Project: `.claude/skills/make-a-dashboard/`
+- User: `~/.claude/skills/make-a-dashboard/`
 
-The folder name and the `name` in `SKILL.md` stay `progress-dashboard`. Invoke with `/progress-dashboard`.
+The folder name and the `name` in `SKILL.md` stay `make-a-dashboard`. Invoke with `/make-a-dashboard`, or say “make a dashboard”. On a task with more than 5 steps or an expected runtime of about 30 minutes, the parent agent runs this before heavy work without being asked.
 
 Claude Code also loads Cursor skill paths (`.cursor/skills/` and `~/.cursor/skills/`). A copy in one of those is enough if you already installed it for Cursor.
 
