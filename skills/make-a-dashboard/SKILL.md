@@ -1,24 +1,24 @@
 ---
 name: make-a-dashboard
-description: "Automatically make a dashboard before any task with more than 5 steps or an expected runtime of about 30 minutes or longer. Do this before heavy work starts. Do not wait for the user to ask. Also use when they say make a dashboard, type /make-a-dashboard, or ask for a progress page. Create .dashboard/index.html and .dashboard/state.json first, then update them after every step. Record blockers, questions with the default action if unanswered, and the latest deliverables, using real wall-clock times."
+description: "When a task has more than 5 steps or will take about 30 minutes or longer, suggest a dashboard and then start it. Tell the user why before heavy work, for example: I'll make a dashboard for this long task — it has more than 5 steps. Do not wait for /make-a-dashboard. Also use when they say make a dashboard or type /make-a-dashboard. Create .dashboard/index.html and .dashboard/state.json, then update after every step. Record blockers, questions with the default action if unanswered, and the latest deliverables, using real wall-clock times."
 ---
 
 # Make a dashboard
 
 Users invoke this with `/make-a-dashboard` or by saying “make a dashboard”.
 
-On a long task, run it yourself. Do not wait for that phrase.
+On a long task, suggest it yourself and then start it. Do not wait for that phrase, and do not set the page up in silence.
 
 ## When to use
 
-Before the first heavy step, make the dashboard whenever either of these is true:
+If the task looks long, say so and make the dashboard before the heavy work. Either of these is enough:
 
 - The work has more than 5 steps.
 - You expect it to take about 30 minutes or longer.
 
-That is the default. The user does not have to remember to ask. If you are about to start a multi-step or long autonomous run, set the page up first, then start the work.
+Tell the user why in the chat, then do it. Use a line like: “I’ll make a dashboard for this long task — it has more than 5 steps.” Name the real reason (step count or expected time). They should see that suggestion. Do not wait for `/make-a-dashboard`.
 
-Also use it when they say “make a dashboard”, type `/make-a-dashboard`, or ask for a progress page or status board.
+Also use it when they say “make a dashboard”, type `/make-a-dashboard`, or ask for a progress page or status board. If they already asked, you can skip the pitch and start.
 
 Skip it for a short edit, a single command, or a question you can answer in one pass.
 
@@ -57,11 +57,12 @@ Store `accent` as hex.
 
 ## Before the task starts
 
-1. Read `references/update-protocol.md` and `assets/dashboard.example.html` from this skill.
-2. Create `.dashboard/`.
-3. Write `state.json` with the real plan. Set `startedAt` to the current clock time. Mark every step `pending` except the one you are about to run.
-4. Render `index.html`.
-5. Tell the user once: double-click `.dashboard/index.html`, or run `open .dashboard/index.html`.
+1. If you are starting this because the task is long, send the suggestion first: why this task qualifies, and that you are making the dashboard now.
+2. Read `references/update-protocol.md` and `assets/dashboard.example.html` from this skill.
+3. Create `.dashboard/`.
+4. Write `state.json` with the real plan. Set `startedAt` to the current clock time. Mark every step `pending` except the one you are about to run.
+5. Render `index.html`.
+6. Tell the user once: double-click `.dashboard/index.html`, or run `open .dashboard/index.html`.
 
 Then start the actual work. The first page has to exist before step 1. Later refreshes must not stall that work.
 

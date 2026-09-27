@@ -9,7 +9,7 @@ Copy this skill folder into either location:
 - Project: `.claude/skills/make-a-dashboard/`
 - User: `~/.claude/skills/make-a-dashboard/`
 
-The folder name and the `name` in `SKILL.md` stay `make-a-dashboard`. Invoke with `/make-a-dashboard`, or say “make a dashboard”. On a task with more than 5 steps or an expected runtime of about 30 minutes, the parent agent runs this before heavy work without being asked.
+The folder name and the `name` in `SKILL.md` stay `make-a-dashboard`. Invoke with `/make-a-dashboard`, or say “make a dashboard”. On a task with more than 5 steps or an expected runtime of about 30 minutes, the parent agent says why and starts the dashboard before heavy work. Example: “I’ll make a dashboard for this long task — it should take about 30 minutes.” Do not wait for the slash command, and do not set it up without that line.
 
 Claude Code also loads Cursor skill paths (`.cursor/skills/` and `~/.cursor/skills/`). A copy in one of those is enough if you already installed it for Cursor.
 
@@ -36,6 +36,6 @@ You maintain the progress dashboard and nothing else.
 
 The parent agent still owns the plan:
 
-1. If the task has more than 5 steps or looks longer than about 30 minutes, write `.dashboard/state.json` before step 1 and ask the dashboard-builder to render once.
+1. If the task has more than 5 steps or looks longer than about 30 minutes, tell the user you are making a dashboard and why, then write `.dashboard/state.json` before step 1 and ask the dashboard-builder to render once.
 2. After each step, update `state.json`, then ask the dashboard-builder to render again.
 3. When a decision is needed, add it to `questions` with `defaultAction` and continue. Do not wait on the subagent or the user before the next real step, after the first page exists.
