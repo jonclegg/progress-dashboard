@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="10">
+  <title>Migrate billing onto the ledger — progress</title>
+  <style>
+    :root {
+      --bg: #0c0e12;
+      --card: #14181f;
+      --card-2: #1b212b;
+      --ink: #f3efe8;
+      --muted: #9a9388;
+      --faint: #6f6a62;
+      --line: #2c313b;
+      --accent: #e3a45a;
+      --accent-ink: #2a1c0c;
+      --ok: #8fbf9f;
+      --bad: #e08b7d;
+      --run: #e3a45a;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { color-scheme: dark; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 420px at 0% -10%, rgba(227, 164, 90, 0.16), transparent 55%),
+        var(--bg);
+      color: var(--ink);
+      font: 15px/1.45 "Segoe UI", system-ui, sans-serif;
+    }
+
+    .wrap {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-end;
+      margin-bottom: 22px;
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font: 600 12px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font: 520 34px/1.1 Georgia, "Iowan Old Style", Palatino, serif;
+      letter-spacing: -0.02em;
+    }
+
+    .summary {
+      max-width: 62ch;
+      margin: 10px 0 0;
+      color: var(--muted);
+    }
+
+    .clock {
+      text-align: right;
+      min-width: 180px;
+    }
+
+    .clock strong {
+      display: block;
+      font: 500 22px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    .clock span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .stat, .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat { padding: 14px 16px 16px; }
+
+    .stat .label, .panel h2 {
+      margin: 0;
+      color: var(--faint);
+      font: 600 11px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .stat .value {
+      margin-top: 8px;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .stat .hint { margin-top: 4px; color: var(--muted); font-size: 13px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px 4px 8px;
+      border-radius: 999px;
+      background: rgba(227, 164, 90, 0.14);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(227, 164, 90, 0.7);
+      animation: pulse 1.8s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      70% { box-shadow: 0 0 0 8px rgba(227, 164, 90, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(227, 164, 90, 0); }
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: 1.35fr 0.9fr;
+      gap: 14px;
+    }
+
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+
+    .panel { padding: 16px 16px 8px; }
+
+    .panel h2 { margin-bottom: 12px; }
+
+    ol.steps { list-style: none; margin: 0; padding: 0 0 8px; }
+
+    ol.steps li {
+      display: grid;
+      grid-template-columns: 16px 1fr auto;
+      gap: 12px;
+      padding: 10px 0 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    ol.steps li:first-child { border-top: 0; padding-top: 0; }
+
+    .mark {
+      width: 10px;
+      height: 10px;
+      margin-top: 5px;
+      border-radius: 50%;
+      background: var(--faint);
+    }
+
+    .mark.done { background: var(--ok); }
+    .mark.run { background: var(--run); }
+    .mark.pending { background: transparent; border: 1.5px solid var(--faint); }
+
+    .step-title { font-weight: 650; }
+    .step-detail { margin-top: 2px; color: var(--muted); font-size: 13px; }
+
+    time, .when {
+      color: var(--faint);
+      font: 12px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: var(--card-2);
+      color: var(--muted);
+      font: 600 10px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: 1px;
+    }
+
+    .tag.run { background: rgba(227, 164, 90, 0.16); color: var(--accent); }
+    .tag.done { background: rgba(143, 191, 159, 0.14); color: var(--ok); }
+
+    .stuck {
+      border-color: rgba(224, 139, 125, 0.45);
+    }
+
+    .stuck h2 { color: var(--bad); }
+
+    .stuck p, .q p, .deliverable p { margin: 0; }
+
+    .item { padding: 0 0 14px; }
+    .item + .item { border-top: 1px solid var(--line); padding-top: 12px; }
+
+    .item h3 { margin: 0 0 4px; font-size: 15px; }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .q {
+      margin: 0 0 12px;
+      padding: 12px 12px 12px 14px;
+      border-radius: 12px;
+      background: var(--card-2);
+      border-left: 3px solid var(--accent);
+    }
+
+    .q .ask { font-weight: 650; }
+
+    .default {
+      margin-top: 8px;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .default b {
+      display: inline-block;
+      margin-right: 6px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .deliverable {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .deliverable:first-of-type { border-top: 0; }
+
+    code {
+      font: 12px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+    }
+
+    th, td {
+      padding: 8px 0;
+      border-top: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      color: var(--faint);
+      font: 600 11px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    td.num, th.num { text-align: right; }
+
+    .bad { color: var(--bad); }
+    .ok { color: var(--ok); }
+
+    .wide { margin-top: 14px; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      color: var(--faint);
+      font: 12px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    @media (max-width: 800px) {
+      .wrap { width: min(100% - 24px, 1080px); padding-top: 18px; }
+      header, footer { flex-direction: column; align-items: flex-start; }
+      .clock { text-align: left; }
+      h1 { font-size: 28px; }
+      .stats, .board { grid-template-columns: 1fr; }
+      time, .when { white-space: normal; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .dot { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Snapshot style.json: {"theme":"dark","density":"airy","accent":"#e3a45a"}. Rebuild per task; do not copy these sections if they do not fit. -->
+  <div class="wrap">
+    <header>
+      <div>
+        <p class="kicker">Progress · example snapshot</p>
+        <h1>Migrate billing onto the ledger</h1>
+        <p class="summary">Backfill 18 months of invoices, cut reads over, and leave writes on the old store until the checksum gate passes.</p>
+      </div>
+      <div class="clock">
+        <strong id="clock">02:36:41</strong>
+        <span id="countdown">Reloads in 10s</span>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Status">
+      <article class="stat">
+        <p class="label">Status</p>
+        <div class="value"><span class="pill"><span class="dot"></span>Running</span></div>
+        <p class="hint">Checksum gap on the Feb shard</p>
+      </article>
+      <article class="stat">
+        <p class="label">Elapsed</p>
+        <p class="value">22m 33s</p>
+        <p class="hint">Started 02:14:08 UTC</p>
+      </article>
+      <article class="stat">
+        <p class="label">Steps</p>
+        <p class="value">3 done</p>
+        <p class="hint">1 running · 3 pending</p>
+      </article>
+      <article class="stat">
+        <p class="label">Questions</p>
+        <p class="value">1 open</p>
+        <p class="hint">Default already in effect</p>
+      </article>
+    </section>
+
+    <div class="board">
+      <section class="panel" aria-labelledby="steps-heading">
+        <h2 id="steps-heading">Steps</h2>
+        <ol class="steps">
+          <li>
+            <span class="mark done" aria-hidden="true"></span>
+            <div>
+              <div class="step-title">Inventory invoice tables <span class="tag done">Done</span></div>
+              <div class="step-detail">14 tables, 3 still written by the legacy app.</div>
+            </div>
+            <time>02:14:11 – 02:18:40</time>
+          </li>
+          <li>
+            <span class="mark done" aria-hidden="true"></span>
+            <div>
+              <div class="step-title">Write the backfill job <span class="tag done">Done</span></div>
+              <div class="step-detail">Idempotent insert keyed by invoice id and revision.</div>
+            </div>
+            <time>02:18:44 – 02:27:02</time>
+          </li>
+          <li>
+            <span class="mark done" aria-hidden="true"></span>
+            <div>
+              <div class="step-title">Dry-run the Feb shard <span class="tag done">Done</span></div>
+              <div class="step-detail">182,441 rows read. No writes.</div>
+            </div>
+            <time>02:27:05 – 02:33:18</time>
+          </li>
+          <li>
+            <span class="mark run" aria-hidden="true"></span>
+            <div>
+              <div class="step-title">Checksum gate, Feb shard <span class="tag run">Running</span></div>
+              <div class="step-detail">Source count is 14 rows ahead of the ledger. Re-running the gap query.</div>
+            </div>
+            <time>02:33:22 –</time>
+          </li>
+          <li>
+            <span class="mark pending" aria-hidden="true"></span>
+            <div>
+              <div class="step-title">Cut reads to the ledger <span class="tag">Pending</span></div>
+              <div class="step-detail">After Feb matches. Jan already matched in the dry-run.</div>
+            </div>
+            <time>—</time>
+          </li>
+          <li>
+            <span class="mark pending" aria-hidden="true"></span>
+            <div>
+              <div class="step-title">Shadow-write for 24h <span class="tag">Pending</span></div>
+              <div class="step-detail">Old store stays the write primary.</div>
+            </div>
+            <time>—</time>
+          </li>
+          <li>
+            <span class="mark pending" aria-hidden="true"></span>
+            <div>
+              <div class="step-title">Finish the cutover note <span class="tag">Pending</span></div>
+              <div class="step-detail">Draft is already in docs/ledger-cutover.md.</div>
+            </div>
+            <time>—</time>
+          </li>
+        </ol>
+      </section>
+
+      <div class="stack">
+        <section class="panel stuck" aria-labelledby="stuck-heading">
+          <h2 id="stuck-heading">Stuck</h2>
+          <div class="item">
+            <h3>Feb shard is 14 rows short</h3>
+            <p class="muted">The dry-run count matched. The checksum query does not. Gap query is running against invoice ids created between 02:11 and 02:20 UTC.</p>
+            <p class="when">Since 02:34:51 UTC</p>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="questions-heading">
+          <h2 id="questions-heading">Questions</h2>
+          <article class="q">
+            <p class="ask">Drop the legacy invoice_adjustments view in this change?</p>
+            <p class="default"><b>Default</b>Leave the view. Record a follow-up in the cutover note.</p>
+            <p class="when">Asked 02:31:04 UTC · open</p>
+          </article>
+        </section>
+
+        <section class="panel" aria-labelledby="deliverables-heading">
+          <h2 id="deliverables-heading">Deliverables</h2>
+          <div class="deliverable">
+            <div>
+              <strong>Backfill job</strong>
+              <p><code>services/ledger/backfill.ts</code></p>
+            </div>
+            <time>02:27:02</time>
+          </div>
+          <div class="deliverable">
+            <div>
+              <strong>Cutover note</strong>
+              <p><code>docs/ledger-cutover.md</code></p>
+            </div>
+            <time>02:29:40</time>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="panel wide" aria-labelledby="shards-heading">
+      <h2 id="shards-heading">Shard checksums</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Shard</th>
+            <th class="num">Source</th>
+            <th class="num">Ledger</th>
+            <th class="num">Delta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026-01</td>
+            <td class="num">201,902</td>
+            <td class="num">201,902</td>
+            <td class="num ok">match</td>
+          </tr>
+          <tr>
+            <td>2026-02</td>
+            <td class="num">182,441</td>
+            <td class="num">182,427</td>
+            <td class="num bad">−14</td>
+          </tr>
+          <tr>
+            <td>2026-03</td>
+            <td class="num">—</td>
+            <td class="num">—</td>
+            <td class="num">not started</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <span>Updated 02:36:41 UTC · this tab reloads every 10s</span>
+      <span>Style dark / airy / #e3a45a</span>
+    </footer>
+  </div>
+  <script>
+    var left = 10;
+    var clock = document.getElementById("clock");
+    var countdown = document.getElementById("countdown");
+
+    function paint() {
+      var now = new Date();
+      clock.textContent = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+      countdown.textContent = "Reloads in " + left + "s";
+    }
+
+    paint();
+    setInterval(function () {
+      left -= 1;
+      if (left < 0) left = 10;
+      paint();
+    }, 1000);
+  </script>
+</body>
+</html>

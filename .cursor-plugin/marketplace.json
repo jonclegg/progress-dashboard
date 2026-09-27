@@ -1,0 +1,28 @@
+{
+  "name": "progress-dashboard",
+  "owner": {
+    "name": "Jon Clegg"
+  },
+  "metadata": {
+    "description": "Cursor plugin that keeps a live HTML progress dashboard for long agent tasks.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "progress-dashboard",
+      "source": ".",
+      "description": "HTML progress dashboard for long agent tasks: steps, blockers, questions with defaults, and deliverables.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Jon Clegg"
+      },
+      "license": "MIT",
+      "keywords": [
+        "dashboard",
+        "progress",
+        "agent",
+        "skills"
+      ]
+    }
+  ]
+}

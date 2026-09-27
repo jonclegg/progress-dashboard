@@ -1,0 +1,17 @@
+{
+  "name": "progress-dashboard",
+  "displayName": "Progress Dashboard",
+  "version": "1.0.0",
+  "description": "HTML progress dashboard for long agent tasks. Tracks steps, blockers, questions with defaults, and deliverables in an auto-refreshing page under .dashboard/.",
+  "author": {
+    "name": "Jon Clegg"
+  },
+  "license": "MIT",
+  "keywords": [
+    "dashboard",
+    "progress",
+    "long-running",
+    "agent",
+    "skills"
+  ]
+}
